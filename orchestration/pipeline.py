@@ -497,5 +497,5 @@ def run_decision_pipeline(selected_contexts: List[str]) -> Dict[str, Any]:
         }
         result["action_rankings"] = {}
         result["scoring_weights"] = {}
-    return result
 
+    return result

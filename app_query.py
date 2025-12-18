@@ -1,3 +1,4 @@
+
 # app_query.py
 # STEP 2: Context-aware querying over SQLite data lake
 # FIXED:
@@ -9,8 +10,11 @@
 import streamlit as st
 import sqlite3
 import pickle
+import numpy as np
 
 from scipy.sparse import vstack  # 🔴 CRITICAL FIX
+from scipy.sparse import issparse
+from sklearn.metrics.pairwise import cosine_similarity
 from engine import CaseIndex
 
 DB_PATH = "storage/data_lake.db"
@@ -149,13 +153,89 @@ st.success(f"Loaded {len(sentences)} sentences from context '{context}'")
 # Query interface
 # ============================================================
 
+# Minimal additions to keep most code same
+top_k = st.number_input("Top K matches", min_value=1, max_value=500, value=50, step=1)
+min_score = st.slider("Min similarity score", 0.0, 1.0, 0.35, 0.01)
+
 query = st.text_input(
     "Ask a question",
     placeholder="e.g. What caused authentication failures?"
 )
 
+# ---------- Local fallback: rank ALL sentences if CaseIndex returns only top-1 ----------
+def _fallback_rank_all(q_text: str, k: int, threshold: float):
+    """
+    Compute cosine similarity between query TF-IDF vector and all sentence vectors,
+    and return top-k matches with a minimal result schema.
+    Keeps your UI compatible even if CaseIndex.query returns only top-1.
+    """
+    if not q_text or not index.vectorizer or index.matrix is None:
+        return []
+
+    # Vectorize query in the SAME TF-IDF space
+    try:
+        q_vec = index.vectorizer.transform([q_text])
+    except Exception:
+        return []
+
+    # Ensure sparse formats; cosine_similarity handles CSR efficiently
+    A = index.matrix
+    B = q_vec
+    if not issparse(A):
+        # Should not happen since we vstack’d sparse vectors
+        A = vstack([A])
+    # Cosine similarity (1 x N)
+    try:
+        sims = cosine_similarity(B, A)  # shape: (1, N)
+        scores = sims.ravel()
+    except Exception:
+        # Fallback to dot if vectors are L2-normalized TF-IDF
+        scores = (A @ B.T).toarray().ravel()
+
+    # Rank + filter
+    order = np.argsort(-scores)  # descending
+    results = []
+    added = 0
+    for idx in order:
+        sc = float(scores[idx])
+        if sc < float(threshold):
+            # Remaining tail will be smaller—stop early
+            if added > 0:
+                break
+            else:
+                continue
+        sent = index.sentences[idx]
+        # Minimal result structure (UI-compatible)
+        results.append({
+            "score": sc,
+            "answer": sent,           # keep super simple: the sentence itself
+            "evidence": sent,         # same sentence as verbatim evidence
+            "stitched_count": 1       # we did not stitch in fallback mode
+        })
+        added += 1
+        if added >= int(k):
+            break
+    return results
+# ---------------------------------------------------------------------------------------
+
 if query:
-    results = index.query(query)
+    # First try native CaseIndex parameters; if it still returns a single record,
+    # we augment with the fallback to ensure multiple matches.
+    use_native = True
+    try:
+        results = index.query(query, top_k=int(top_k), score_threshold=float(min_score))
+        # Defensive: if result is not a list or has length <= 1 but k > 1, use fallback
+        if not isinstance(results, list) or (len(results) <= 1 and top_k > 1):
+            use_native = False
+    except TypeError:
+        # Engine signature doesn’t accept our params
+        use_native = False
+    except Exception:
+        # Engine error—fallback
+        use_native = False
+
+    if not use_native:
+        results = _fallback_rank_all(query, top_k, min_score)
 
     if not results:
         st.warning(
@@ -163,15 +243,26 @@ if query:
             "This is a correct refusal based on document content."
         )
     else:
-        r = results[0]
+        st.subheader("Answers (Evidence-Based)")
 
-        st.subheader("Answer (Evidence-Based)")
-        st.write(r["answer"])
+        # ⬇️ Show ALL matches — one block per result
+        for i, r in enumerate(results, start=1):
+            st.markdown(f"**Match {i}**")
 
-        st.caption(
-            f"Similarity score: {r['score']:.4f} | "
-            f"Sentences stitched: {r['stitched_count']}"
-        )
+            # Answer
+            st.write(r.get("answer", ""))
 
-        with st.expander("🔎 Evidence (verbatim from documents)"):
-            st.write(r["evidence"])
+            # Meta caption
+            score = float(r.get("score", 0.0))
+            stitched = int(r.get("stitched_count", 0))
+            st.caption(
+                f"Similarity score: {score:.4f} | "
+                f"Sentences stitched: {stitched}"
+            )
+
+            # Evidence — one expander per match (no nesting)
+            evidence = r.get("evidence", "")
+            if evidence:
+                with st.expander("🔎 Evidence (verbatim from documents)"):
+                    st.write(evidence)
+
