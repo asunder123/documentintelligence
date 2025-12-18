@@ -1,0 +1,7 @@
+Document ID: 78
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.511425
+
+Transactions were rejected by the gateway.
+A permanent fix is deferred due to business constraints.
+Logs showed repeated warning messages.

@@ -1,0 +1,8 @@
+Document ID: 27
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.441488
+
+Transactions were rejected by the gateway.
+This was due to increased load on the service.
+Engineers restarted the affected service.
+The service recovered within five minutes.

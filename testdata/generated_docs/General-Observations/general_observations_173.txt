@@ -1,0 +1,9 @@
+Document ID: 173
+Context: General-Observations
+Generated at: 2025-12-18T03:19:23.630713
+
+Monitoring alerts were triggered during the incident.
+The service experienced intermittent authentication failures.
+This was due to increased load on the service.
+Additional capacity was provisioned.
+Customer impact was mitigated successfully.

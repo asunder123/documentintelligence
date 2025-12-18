@@ -1,0 +1,9 @@
+Document ID: 71
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.502874
+
+Metrics indicated abnormal behavior.
+Several requests timed out during peak traffic.
+This was due to increased load on the service.
+Engineers restarted the affected service.
+The service recovered within five minutes.

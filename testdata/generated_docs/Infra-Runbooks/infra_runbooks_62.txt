@@ -1,0 +1,7 @@
+Document ID: 62
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.490361
+
+The application became unavailable for multiple users.
+The failure occurred due to a stalled background job.
+The cache was cleared and rebuilt.

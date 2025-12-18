@@ -1,0 +1,8 @@
+Document ID: 63
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.491390
+
+Latency increased significantly across the API.
+The root cause was an expired authentication token.
+The deployment was rolled back to the previous version.
+No further incidents were observed.

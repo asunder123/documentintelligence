@@ -1,0 +1,9 @@
+Document ID: 86
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.521936
+
+Logs showed repeated warning messages.
+The application became unavailable for multiple users.
+The failure occurred due to a stalled background job.
+Additional capacity was provisioned.
+Customer impact was mitigated successfully.

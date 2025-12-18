@@ -1,14 +1,15 @@
 # app_decision.py
-# Decision Intelligence View (Multi-Context)
-# Structural, rule-based, explainable
+# Decision Intelligence UI
+# Fully orchestrator-driven (NO backend logic here)
 
 import streamlit as st
 import pandas as pd
 
-from analytics.loader import load_sentences_with_context
-from decision.role_classifier import classify_sentence
-from decision.chain_builder import build_chains
-from decision.metrics import decision_coverage
+from analytics.loader import load_available_contexts
+from orchestration.pipeline import (
+    run_decision_pipeline,
+    PipelineError
+)
 
 
 # ============================================================
@@ -19,32 +20,27 @@ st.set_page_config(page_title="Decision Intelligence", layout="wide")
 st.title("🧭 Decision Intelligence")
 
 st.caption(
-    "Analyzes how problems, causes, actions, and outcomes are documented "
-    "across one or more contexts. Structural, explainable, non-LLM."
+    "Structural, rule-based decision intelligence derived from documents. "
+    "This view analyzes how problems, causes, actions, outcomes, and constraints "
+    "are documented across one or more contexts. "
+    "No inference, no LLMs, fully explainable."
 )
 
 
 # ============================================================
-# Load data
+# Context selection
 # ============================================================
 
-df = load_sentences_with_context()
+contexts = load_available_contexts()
 
-if df.empty:
-    st.warning("No data available. Ingest documents first.")
+if not contexts:
+    st.warning("No contexts available. Ingest documents first.")
     st.stop()
-
-
-# ============================================================
-# Context selection (MULTI-SELECT)
-# ============================================================
-
-all_contexts = sorted(df["context"].unique())
 
 selected_contexts = st.multiselect(
     "Select context(s) for decision analysis",
-    all_contexts,
-    default=all_contexts[:1]
+    contexts,
+    default=contexts[:1]
 )
 
 if not selected_contexts:
@@ -52,54 +48,87 @@ if not selected_contexts:
     st.stop()
 
 
-df = df[df["context"].isin(selected_contexts)]
+# ============================================================
+# Run decision pipeline (UNIFIED ORCHESTRATOR)
+# ============================================================
+
+with st.spinner("Running decision intelligence pipeline…"):
+    try:
+        result = run_decision_pipeline(selected_contexts)
+    except PipelineError as e:
+        st.error(str(e))
+        st.stop()
+
+
+chains_by_context = result["chains_by_context"]
+metrics = result["metrics"]
+debt = result["debt"]
+completeness = result["completeness"]
+total_chains = result["total_chains"]
 
 
 # ============================================================
-# Role classification (per sentence)
+# High-level decision coverage
 # ============================================================
 
-df["role"] = df["sentence_text"].apply(classify_sentence)
-
-
-# ============================================================
-# Build chains PER CONTEXT
-# ============================================================
-
-all_chains = []
-chains_by_context = {}
-
-for ctx in selected_contexts:
-    ctx_df = df[df["context"] == ctx]
-
-    sentences_with_roles = list(
-        zip(ctx_df["sentence_text"], ctx_df["role"])
-    )
-
-    chains = build_chains(sentences_with_roles)
-
-    chains_by_context[ctx] = chains
-    all_chains.extend(chains)
-
-
-# ============================================================
-# Aggregate decision metrics
-# ============================================================
-
-overall_metrics = decision_coverage(all_chains)
-
-
-st.subheader("📊 Overall Decision Coverage")
+st.subheader("📊 Decision Coverage (Across Selected Contexts)")
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Total cause chains", overall_metrics.get("total_chains", 0))
+
+col1.metric(
+    "Total cause chains",
+    total_chains,
+    help="Distinct cause-led decision chains detected"
+)
+
 col2.metric(
     "Action coverage",
-    f"{overall_metrics.get('action_coverage', 0) * 100:.1f}%"
+    f"{metrics.get('action_coverage', 0) * 100:.1f}%",
+    help="How often documented causes lead to actions"
 )
+
 col3.metric(
     "Outcome coverage",
-    f"{overall_metrics.get('outcome_coverage', 0) * 100:.1f}%"
+    f"{metrics.get('outcome_coverage', 0) * 100:.1f}%",
+    help="How often actions document outcomes"
+)
+
+
+# ============================================================
+# Decision debt & broken chains
+# ============================================================
+
+st.subheader("⚠️ Decision Debt & Broken Chains")
+
+col1, col2, col3, col4 = st.columns(4)
+
+col1.metric(
+    "Broken chains",
+    debt.get("broken_chains", 0),
+    help="Chains missing actions or outcomes"
+)
+
+col2.metric(
+    "Cause only",
+    debt.get("cause_only", 0),
+    help="Known issues without documented action"
+)
+
+col3.metric(
+    "Action only",
+    debt.get("action_only", 0),
+    help="Actions taken without stated causes"
+)
+
+col4.metric(
+    "Decision debt",
+    f"{debt.get('decision_debt', 0) * 100:.1f}%",
+    help="Higher = more unresolved or incomplete decisions"
+)
+
+st.caption(
+    "Decision debt highlights where issues are identified but not fully "
+    "resolved or documented. This is a structural signal, not a judgement."
 )
 
 
@@ -112,6 +141,8 @@ st.subheader("📂 Context-wise Decision Maturity")
 rows = []
 
 for ctx, chains in chains_by_context.items():
+    from decision.metrics import decision_coverage  # read-only
+
     m = decision_coverage(chains)
     rows.append({
         "Context": ctx,
@@ -125,22 +156,22 @@ st.dataframe(comparison_df, use_container_width=True)
 
 
 # ============================================================
-# Sample chains (cross-context)
+# Sample decision chains
 # ============================================================
 
 st.subheader("🔗 Sample Cause → Action → Outcome Chains")
 
+MAX_SHOW = 6
 shown = 0
-MAX_SHOW = 5
 
 for ctx, chains in chains_by_context.items():
-    for c in chains:
+    for chain in chains:
         if shown >= MAX_SHOW:
             break
 
         with st.expander(f"Context: {ctx}"):
-            for k, v in c.items():
-                st.write(f"**{k}**: {v}")
+            for role, sentence in chain.items():
+                st.write(f"**{role}**: {sentence}")
 
         shown += 1
 
@@ -149,22 +180,24 @@ for ctx, chains in chains_by_context.items():
 
 
 # ============================================================
-# Interpretation helper (SAFE, NON-INFERENTIAL)
+# Interpretation guide (static, safe)
 # ============================================================
 
-st.subheader("🧠 How to read this")
+st.subheader("🧠 How to interpret this view")
 
 st.markdown(
     """
-- **Cause chains** indicate where issues are *explained*, not just observed  
-- **Action coverage** shows how often causes lead to mitigations  
-- **Outcome coverage** shows whether actions are followed by results  
+**What this shows**
+- **Cause chains** indicate explained issues
+- **Action coverage** shows whether explanations lead to mitigation
+- **Outcome coverage** shows whether learning is closed
+- **Decision debt** highlights unresolved or undocumented decisions
 
-Low outcome coverage usually signals:
-- firefighting
-- incomplete RCAs
-- or undocumented learnings
+**What this does NOT do**
+- It does not judge correctness
+- It does not infer intent
+- It does not predict outcomes
 
-This view is structural and descriptive — it does not infer intent.
+This view is **structural, deterministic, and auditable**.
 """
 )

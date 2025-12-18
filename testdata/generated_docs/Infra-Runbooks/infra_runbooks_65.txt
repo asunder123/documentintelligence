@@ -1,0 +1,6 @@
+Document ID: 65
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.493360
+
+The deployment was rolled back to the previous version.
+Monitoring alerts were triggered during the incident.

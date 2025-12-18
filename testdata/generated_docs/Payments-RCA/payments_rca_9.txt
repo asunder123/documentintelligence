@@ -1,0 +1,7 @@
+Document ID: 9
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.417700
+
+The service experienced intermittent authentication failures.
+This was due to increased load on the service.
+The deployment was rolled back to the previous version.

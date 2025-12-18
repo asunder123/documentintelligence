@@ -1,0 +1,9 @@
+Document ID: 38
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.457238
+
+Metrics indicated abnormal behavior.
+The application became unavailable for multiple users.
+This was due to increased load on the service.
+The cache was cleared and rebuilt.
+The service recovered within five minutes.

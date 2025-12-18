@@ -1,0 +1,8 @@
+Document ID: 129
+Context: Security-Notes
+Generated at: 2025-12-18T03:19:23.576173
+
+Metrics indicated abnormal behavior.
+Transactions were rejected by the gateway.
+This happened because the database connection pool was exhausted.
+The cache was cleared and rebuilt.

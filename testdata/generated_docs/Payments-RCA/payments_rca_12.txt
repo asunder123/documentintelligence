@@ -1,0 +1,8 @@
+Document ID: 12
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.420883
+
+Logs showed repeated warning messages.
+The application became unavailable for multiple users.
+The root cause was an expired authentication token.
+Additional capacity was provisioned.

@@ -1,0 +1,8 @@
+Document ID: 49
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.470503
+
+The incident was detected by automated checks.
+Transactions were rejected by the gateway.
+The root cause was an expired authentication token.
+The issue remains under investigation.

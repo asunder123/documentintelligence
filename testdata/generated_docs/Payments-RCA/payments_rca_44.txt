@@ -1,0 +1,7 @@
+Document ID: 44
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.464784
+
+The application became unavailable for multiple users.
+The issue was caused by a misconfigured cache.
+The cache was cleared and rebuilt.

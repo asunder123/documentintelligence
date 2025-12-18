@@ -1,0 +1,8 @@
+Document ID: 183
+Context: General-Observations
+Generated at: 2025-12-18T03:19:23.645549
+
+Transactions were rejected by the gateway.
+The root cause was an expired authentication token.
+Additional capacity was provisioned.
+Normal operations were restored shortly after.

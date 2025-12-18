@@ -1,0 +1,8 @@
+Document ID: 53
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.476743
+
+Monitoring alerts were triggered during the incident.
+The application became unavailable for multiple users.
+The issue was caused by a misconfigured cache.
+Additional capacity was provisioned.

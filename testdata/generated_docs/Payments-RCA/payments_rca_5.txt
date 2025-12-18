@@ -1,0 +1,8 @@
+Document ID: 5
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.411730
+
+Latency increased significantly across the API.
+This happened because the database connection pool was exhausted.
+Engineers restarted the affected service.
+The service recovered within five minutes.

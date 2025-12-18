@@ -1,0 +1,8 @@
+Document ID: 123
+Context: Security-Notes
+Generated at: 2025-12-18T03:19:23.569081
+
+The application became unavailable for multiple users.
+The root cause was an expired authentication token.
+Engineers restarted the affected service.
+The service recovered within five minutes.

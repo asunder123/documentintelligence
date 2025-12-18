@@ -1,0 +1,8 @@
+Document ID: 48
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.469496
+
+Latency increased significantly across the API.
+The failure occurred due to a stalled background job.
+The service configuration was updated.
+No further incidents were observed.

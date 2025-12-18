@@ -1,0 +1,8 @@
+Document ID: 101
+Context: Security-Notes
+Generated at: 2025-12-18T03:19:23.540905
+
+The incident was detected by automated checks.
+The application became unavailable for multiple users.
+Upgrading the component is not possible in the current release cycle.
+The incident was detected by automated checks.

@@ -1,0 +1,8 @@
+Document ID: 104
+Context: Security-Notes
+Generated at: 2025-12-18T03:19:23.545366
+
+Metrics indicated abnormal behavior.
+Latency increased significantly across the API.
+This happened because the database connection pool was exhausted.
+Additional capacity was provisioned.

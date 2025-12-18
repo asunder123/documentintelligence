@@ -1,0 +1,8 @@
+Document ID: 15
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.424882
+
+The incident was detected by automated checks.
+Several requests timed out during peak traffic.
+The root cause was an expired authentication token.
+The service configuration was updated.

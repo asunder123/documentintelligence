@@ -1,0 +1,9 @@
+Document ID: 79
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.512425
+
+Monitoring alerts were triggered during the incident.
+Latency increased significantly across the API.
+This was due to increased load on the service.
+Engineers restarted the affected service.
+Normal operations were restored shortly after.

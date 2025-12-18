@@ -1,0 +1,9 @@
+Document ID: 76
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.509426
+
+Monitoring alerts were triggered during the incident.
+The service experienced intermittent authentication failures.
+The failure occurred due to a stalled background job.
+Additional capacity was provisioned.
+The service recovered within five minutes.

@@ -1,0 +1,9 @@
+Document ID: 85
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.519936
+
+Monitoring alerts were triggered during the incident.
+Several requests timed out during peak traffic.
+The root cause was an expired authentication token.
+Additional capacity was provisioned.
+The service recovered within five minutes.

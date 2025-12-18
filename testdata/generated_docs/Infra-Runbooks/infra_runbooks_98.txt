@@ -1,0 +1,8 @@
+Document ID: 98
+Context: Infra-Runbooks
+Generated at: 2025-12-18T03:19:23.536936
+
+The application became unavailable for multiple users.
+The issue was caused by a misconfigured cache.
+Engineers restarted the affected service.
+The system stabilized after the fix.

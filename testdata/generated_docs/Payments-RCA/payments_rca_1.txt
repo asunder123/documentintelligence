@@ -1,0 +1,8 @@
+Document ID: 1
+Context: Payments-RCA
+Generated at: 2025-12-18T03:19:23.403809
+
+The incident was detected by automated checks.
+Several requests timed out during peak traffic.
+The failure occurred due to a stalled background job.
+The cache was cleared and rebuilt.

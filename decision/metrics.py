@@ -14,3 +14,23 @@ def decision_coverage(chains):
         "action_coverage": with_action / total,
         "outcome_coverage": with_outcome / total
     }
+
+
+# decision/metrics.py (append)
+
+def chain_completeness(chains):
+    """
+    Return completeness ratios for reporting.
+    """
+    if not chains:
+        return {}
+
+    complete = sum(
+        1 for c in chains
+        if "CAUSE" in c and "ACTION" in c and "OUTCOME" in c
+    )
+
+    return {
+        "complete_ratio": complete / len(chains),
+        "incomplete_ratio": 1 - (complete / len(chains))
+    }

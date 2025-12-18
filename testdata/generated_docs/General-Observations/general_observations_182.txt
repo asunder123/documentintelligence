@@ -1,0 +1,8 @@
+Document ID: 182
+Context: General-Observations
+Generated at: 2025-12-18T03:19:23.643617
+
+Monitoring alerts were triggered during the incident.
+The application became unavailable for multiple users.
+This happened because the database connection pool was exhausted.
+Engineers restarted the affected service.
