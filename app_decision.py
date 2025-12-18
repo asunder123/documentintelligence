@@ -180,8 +180,99 @@ for ctx, chains in chains_by_context.items():
 
 
 # ============================================================
+# Unified Decision (deterministic, orchestrator-provided)
+# ============================================================
+
+st.subheader("🟢 Unified Decision (Deterministic)")
+
+# Read optional keys from orchestrator result without changing prior code
+unified = result.get("unified_decision")
+weights = result.get("scoring_weights", {})
+rankings = result.get("action_rankings", {})
+
+if not unified:
+    st.info(
+        "No unified recommendation available from the orchestrator.\n\n"
+        "Tip: Extend `run_decision_pipeline` to add `unified_decision`, "
+        "`action_rankings`, and `scoring_weights` to the result payload."
+    )
+else:
+    # Compact scorecard view + rationale
+    sc = unified.get("scorecard", {}) or {}
+
+    colA, colB = st.columns([2, 1])
+    with colA:
+        st.markdown("### Recommended Action")
+        st.markdown(f"**{unified.get('action', '(missing)')}**")
+        st.caption(
+            "Selected using structural signals (support, coverage, outcomes, constraints, debt). "
+            "No inference."
+        )
+
+        st.markdown("**Rationale (scorecard)**")
+        st.json({
+            "score": sc.get("score"),
+            "support (contexts)": sc.get("support"),
+            "cause_coverage": sc.get("cause_coverage"),
+            "outcome_strength": sc.get("outcome_strength"),
+            "recency": sc.get("recency"),
+            "constraint_fit": sc.get("constraint_fit"),
+            "debt_penalty": sc.get("debt_penalty"),
+            "contexts": sc.get("contexts"),
+        })
+
+    with colB:
+        st.markdown("**Weights**")
+        st.json(weights or {"info": "Weights not provided by orchestrator"})
+
+    # Evidence from sample chains for auditability
+    with st.expander("🔍 Evidence (sample chains)"):
+        for ch in (sc.get("sample_chains") or []):
+            ctx = ch.get("context")
+            cause = ch.get("cause")
+            action = ch.get("action")
+            outcome = ch.get("outcome")
+            ts = ch.get("timestamp")
+            st.write(
+                f"- **[{ctx}]** Cause: {cause} → **Action:** {action} → Outcome: {outcome} "
+                f"{f'(ts: {ts})' if ts else ''}"
+            )
+
+    # Top alternatives (if orchestrator provided them)
+    alts = unified.get("alternatives") or []
+    if alts:
+        st.markdown("#### Alternatives")
+        for alt in alts:
+            a = alt.get("action", "")
+            d = alt.get("scorecard", {}) or {}
+            st.write(
+                f"- **{a}** "
+                f"(score: {d.get('score')}, outcome_strength: {d.get('outcome_strength')}, "
+                f"debt: {d.get('debt_penalty')})"
+            )
+
+# Optional: export action rankings (if available) for governance reviews
+if rankings:
+    import json
+    dl_col, cap_col = st.columns([1, 3])
+    with dl_col:
+        st.download_button(
+            label="⬇️ Download action rankings (JSON)",
+            data=json.dumps(rankings, indent=2),
+            file_name="action_rankings.json",
+            mime="application/json",
+            use_container_width=True
+               )
+    with cap_col:
+        st.caption(
+            "Export provides the deterministic scorecards for each action across contexts.")
+
+
+# ============================================================
 # Interpretation guide (static, safe)
 # ============================================================
+
+
 
 st.subheader("🧠 How to interpret this view")
 
